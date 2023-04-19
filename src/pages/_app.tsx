@@ -5,6 +5,8 @@ import { SessionProvider } from "next-auth/react";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
+import { Header } from "~/components/Header";
+import { Footer } from "~/components/Footer";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -12,7 +14,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <Header />
+      <main className="flex min-h-screen flex-col items-stretch justify-center">
+        <Component {...pageProps} />
+      </main>
+      <Footer />
     </SessionProvider>
   );
 };
