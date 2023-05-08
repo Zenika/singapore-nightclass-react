@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
 type ProductNode = {
   title: string;
   id: string;
   handle: string;
+  images: {
+    edges: {
+      node: {
+        url: string;
+      };
+    }[];
+  };
+  variants: {
+    edges: { node: { price: { amount: number; currencyCode: string } } }[];
+  };
 };
 
 type ProductEdge = {
@@ -37,7 +48,7 @@ export default function Collection() {
   useEffect(() => {
     if (collectionName && typeof collectionName === "string") {
       fetch(
-        `https://mock.shop/api?query={collectionByHandle(handle:%20%22${collectionName}%22){title%20products(first:%2010){edges%20{node%20{title%20id%20handle}}}}}`
+        `https://mock.shop/api?query={collectionByHandle(handle: "${collectionName}"){title products(first: 10){edges {node {title id handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } } }`
       )
         .then((response) => response.json())
         .then((result: Response) =>
@@ -48,19 +59,37 @@ export default function Collection() {
   }, [collectionName]);
 
   return (
-    <div className={"p-10"}>
+    <div className={"bg-gray-100 p-10"}>
       <h1 className={"my-8 text-5xl font-bold"}>Collection {collectionName}</h1>
 
-      <ul className={"flex flex-wrap gap-4"}>
+      <ul className={"grid grid-cols-3 flex-wrap gap-8"}>
         {products.map((product) => (
           <li key={product.node.handle}>
             <Link
-              className={
-                "flex rounded border-[1px] border-solid border-teal-400 bg-teal-100 p-4 hover:bg-teal-200"
-              }
+              className={"group flex flex-col justify-start border-solid"}
               href={`/products/${product.node.handle}`}
             >
-              {product.node.title}
+              <div className={"overflow-hidden rounded"}>
+                <img
+                  src={product.node.images.edges[0]?.node.url}
+                  alt=""
+                  className={
+                    "aspect-square object-cover transition-transform duration-100 group-hover:scale-[1.1]"
+                  }
+                />
+              </div>
+              <p
+                className={
+                  "mt-4 flex items-center text-lg font-semibold group-hover:underline"
+                }
+              >
+                {product.node.title}{" "}
+                <ArrowRightIcon className={"ml-2 h-4 w-4"} />
+              </p>
+              <p className={"mb-4 flex items-center"}>
+                {product.node.variants.edges[0]?.node.price.currencyCode}
+                {product.node.variants.edges[0]?.node.price.amount}
+              </p>
             </Link>
           </li>
         ))}
