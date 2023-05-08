@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
 type ProductNode = {
   title: string;
@@ -83,8 +82,7 @@ export default function Collection() {
                   "mt-4 flex items-center text-lg font-semibold group-hover:underline"
                 }
               >
-                {product.node.title}{" "}
-                <ArrowRightIcon className={"ml-2 h-4 w-4"} />
+                {product.node.title}
               </p>
               <p className={"mb-4 flex items-center"}>
                 {product.node.variants.edges[0]?.node.price.currencyCode}
