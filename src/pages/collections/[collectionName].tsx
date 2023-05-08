@@ -49,7 +49,7 @@ export default function Collection() {
 
   return (
     <div className={"p-10"}>
-      <h1 className={"text-5xl"}>Collection {collectionName}</h1>
+      <h1 className={"my-8 text-5xl font-bold"}>Collection {collectionName}</h1>
 
       <ul className={"flex flex-wrap gap-4"}>
         {products.map((product) => (
