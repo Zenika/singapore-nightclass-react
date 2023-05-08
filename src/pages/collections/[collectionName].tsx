@@ -45,7 +45,7 @@ export default function Collection() {
         )
         .catch(console.error);
     }
-  });
+  }, [collectionName]);
 
   return (
     <div className={"p-10"}>
