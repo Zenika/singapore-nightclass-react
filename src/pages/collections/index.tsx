@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { LoadingCollection } from "~/components/Collections/LoadingCollection";
 
 type CollectionEdge = {
   cursor: string;

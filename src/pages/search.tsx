@@ -1,6 +1,9 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LoadingProduct } from "~/components/Product/LoadingProduct";
+import { NoResults } from "~/components/Search/NoResults";
+import { Error } from "~/components/Search/Error";
 
 type Product = {
   node: {
@@ -43,7 +46,7 @@ const Search = () => {
           return response.json();
         })
         .then((jsonResponse: ProductsResponse) => {
-          setResults(jsonResponse.data.products.edges);
+          // setResults(jsonResponse.data.products.edges);
         })
         .catch(console.error);
   }, [q]);
@@ -52,8 +55,9 @@ const Search = () => {
     <div className="p-4 md:p-10">
       <h1 className="text-5xl font-extrabold">Search results</h1>
       <p className={"mb-8"}>
-        {results?.length} result(s) for {q}
+        {results?.length || 0} result(s) for {q}
       </p>
+      {!results && <Error />}
       {results && (
         <ul className="grid grid-cols-3 gap-8">
           {results.map((result) => (
@@ -79,12 +83,15 @@ const Search = () => {
                   {result.node.title}
                 </p>
                 <p className={"mb-4 flex items-center"}>
+                  ${result.node.variants.edges[0]?.node.price.amount}{" "}
                   {result.node.variants.edges[0]?.node.price.currencyCode}
-                  {result.node.variants.edges[0]?.node.price.amount}
                 </p>
               </Link>
             </li>
           ))}
+          <li>
+            <LoadingProduct />
+          </li>
         </ul>
       )}
     </div>
