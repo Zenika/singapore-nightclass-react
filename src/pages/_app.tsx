@@ -15,7 +15,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <Header />
-      <main className="flex grow flex-col items-stretch justify-center">
+      <main className="flex grow flex-col">
         <Component {...pageProps} />
       </main>
       <Footer />

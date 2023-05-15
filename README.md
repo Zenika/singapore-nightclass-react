@@ -234,3 +234,39 @@ const handleSubmit = (e: any) => {
 ```
 
 Then we need to build the search result page. You are equipped with all the tool you need to build it yourself!
+
+# Nightclass 2
+
+# Exercices
+
+# Step 1
+
+We want to improve the user experience while browsing the application. So far we don't have any indication that the application is loading or that any type of error has happened.
+
+We already have components ready to display those states but they are not being displayed yet.
+
+We'll use the "search" functionality as an example for this session but once you're done with the search we'll be able to update any other page.
+
+## Displaying a loading state
+
+In `search.tsx` we have a variable that holds the data we want to display but nothing to keep track of the loading state.
+We can add a `useState` to keep track of whether we are loading the result (or not) and set it accordingly based on the state of the request.
+While the request is loading we could display a few `LoadingProducts.tsx` components to show that something is loading.
+
+You can refer to the `TODO:#1` in `search.tsx` if you are unsure what to do.
+
+
+## Displaying an error state
+
+In `search.tsx` we can do something very similar to what we just did to also manage any error that might arise.
+We can add another `useState` to choose whether we should display an error message to our users when the request to get the data fails.
+When there's an actual error we should display a `Error.tsx` component instead of trying to display a list of results.
+
+You can refer to the `TODO:#2` in `search.tsx` if you are unsure what to do.
+
+## Displaying an empty state 
+
+When there is no valid results to be displayed, the search page looks empty. We could also display a specific component to show the lack of results.
+Display `NoResults.tsx` when the result of the search is empty.
+
+You can refer to the `TODO:#3` in `search.tsx` if you are unsure what to do.
