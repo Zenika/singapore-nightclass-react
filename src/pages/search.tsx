@@ -49,7 +49,7 @@ const Search = () => {
   }, [q]);
 
   return (
-    <div className="p-10">
+    <div className="p-4 md:p-10">
       <h1 className="text-5xl font-extrabold">Search results</h1>
       <p className={"mb-8"}>
         {results?.length} result(s) for {q}

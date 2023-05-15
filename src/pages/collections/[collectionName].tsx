@@ -58,7 +58,7 @@ export default function Collection() {
   }, [collectionName]);
 
   return (
-    <div className={"bg-gray-100 p-10"}>
+    <div className={"bg-gray-100 p-4 md:p-10"}>
       <h1 className={"my-8 text-5xl font-bold"}>Collection {collectionName}</h1>
 
       <ul className={"grid grid-cols-3 flex-wrap gap-8"}>
