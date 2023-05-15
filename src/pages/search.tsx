@@ -46,7 +46,7 @@ const Search = () => {
           return response.json();
         })
         .then((jsonResponse: ProductsResponse) => {
-          // setResults(jsonResponse.data.products.edges);
+          setResults(jsonResponse.data.products.edges);
         })
         .catch(console.error);
   }, [q]);
@@ -89,9 +89,6 @@ const Search = () => {
               </Link>
             </li>
           ))}
-          <li>
-            <LoadingProduct />
-          </li>
         </ul>
       )}
     </div>
