@@ -270,3 +270,32 @@ When there is no valid results to be displayed, the search page looks empty. We 
 Display `NoResults.tsx` when the result of the search is empty.
 
 You can refer to the `TODO:#3` in `search.tsx` if you are unsure what to do.
+
+# Step 2
+
+## Using `useQuery` from react-query
+
+We learned how to manage loading, error, and empty state for one component ; now we need to do that every time we want to get some data. That's cumbersome.
+
+To avoid setting all these `useState` everytime we can use some library to do it for us. We can replace our `useEffect` that fetches the data by a hook called `useQuery` provided by `react-query`. By doing so we won't have to manage error and loading state, `react-query` will do it for us, and more.
+In the end, you should have something that looks like this: 
+```typescript
+const { data, isLoading, isError } = useQuery(
+    [`search`, query],
+    async (): Promise<Product[]> => {
+      const response = await fetch(
+        `https://mock.shop/api?...${query}...`
+      );
+      const jsonResponse = (await response.json()) as ProductsResponse;
+      return jsonResponse.data.products.edges;
+    }
+);
+```
+
+You can refer to the `TODO:#4` in `search.tsx` and [react-query's docs](https://tanstack.com/query/v4/docs/react/guides/queries) if you need some guidance.
+
+## Creating reusable hooks
+
+Now that our data fetching is handled by `react-query`, we might want to avoid rewriting the same thing query function twice so we can extract it in its own file. We might not reuse it right now but it may come in handy when we want to test/mock our function.
+
+You can refer to the `TODO:#5` in `search.tsx` and [this sample](https://github.com/TanStack/query/blob/main/examples/react/basic-typescript/src/index.tsx#L28) .
