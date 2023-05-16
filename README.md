@@ -299,3 +299,69 @@ You can refer to the `TODO:#4` in `search.tsx` and [react-query's docs](https://
 Now that our data fetching is handled by `react-query`, we might want to avoid rewriting the same thing query function twice so we can extract it in its own file. We might not reuse it right now but it may come in handy when we want to test/mock our function.
 
 You can refer to the `TODO:#5` in `search.tsx` and [this sample](https://github.com/TanStack/query/blob/main/examples/react/basic-typescript/src/index.tsx#L28) .
+
+# Step 3
+
+Now that we know how to get data, we need to learn how to send data as well. 
+We can learn to do it using `react-query`'s `useMutation` hook. This is very similar to `useQuery` except this time we'll be sending some data alongside our request.
+
+## Using `useMutation`
+
+We have a simple use case for mutation: getting people to subscribe to our newsletter! Even though we don't have a newsletter running (yet) we can start collecting emails already.
+The footer of our app now have a new input field to collect email and a button to submit it!
+We also have a (fake) endpoint ready in our NextJS application: `/pages/api/newsletter.ts`. This endpoint does not do anything except returning the proper HTTP status but at least we can set everything like a real API call.
+
+The fetch call for our mutation should look like this:
+```typescript
+fetch('/api/newsletter', {
+  method: 'POST',
+  body: JSON.stringify({ email: 'some email' })
+})
+```
+
+Open the `Footer.tsx` file and follow the `TODO:#6` to get started. You can read more about using the fetch function to do POST call [here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and more about the `useMutation` hook in [`react-query`'s docs](https://tanstack.com/query/v4/docs/react/reference/useMutation)
+
+## Using tRPC
+
+Last time we set up a few things: hosting, deployment, and our database. Everything is still connected and we should be able to persist data. 
+
+The Database schema has been altered to add a new entity: `Subscriber`.
+The Subscriber table will only record all emails addresses that have successfully registered to our newsletter.
+
+To update your schema if you haven't done so yet: `npx prisma db push`
+
+Go to your [Planetscale dashboard](https://app.planetscale.com/), select your DB and go to `Console` and connect to it.
+
+A Terminal opens up and we can send command to browse our DB.
+
+```
+SHOW TABLES;
+-- you should see `Subscriber`
+SELECT * FROM Subscriber;
+-- you should initially have no data
+```
+
+Back to our app.
+
+A new `tRPC` endpoint has been defined in `/server/api/routers/newsletter.ts`. This time we really are persisting the data in our database!
+To use this endpoint in our frontend application, we need to use the `tRPC` client from `~/utils/api`. With the help of `createTRPCNext<AppRouter>` the object will contains all our routes definitions and will be typesafe. We can now define our schema for the backend and use all the type definition in the frontend for free!
+
+Replace the `useMutation` hook we wrote in the previous step by `api.newsletter.subscribe.useMutation()`.
+
+If you now try to submit the form, you should see a "Subscribed" message instead of the text field. Network tab should confirm that the request went through.
+We can double check in Planetscale dashboard.
+
+```
+SELECT * FROM Subscriber;
+-- you should see some data now
+-- you can clear your DB from test data using
+DELETE FROM Subscriber;
+```
+
+# Wrapping up
+
+We now have a robust way of fetching and managing the lifecycle of our data. 
+We're able to reuse function to fetch our data and leverage a built-in caching mecanism.
+We're able to collect information through a form and save that data in our database for long term storage.
+
+We're now ready to go a bit more in-depth regarding form and data collection but that will gonna have to wait for part 3 of our series!
