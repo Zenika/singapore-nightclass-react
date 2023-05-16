@@ -46,15 +46,28 @@ const Product = () => {
   }, [productName]);
 
   return (
-    <div className={"p-10"}>
+    <div className={"flex grow flex-col bg-gray-100 p-4 md:p-10"}>
       {productDetail && (
-        <>
-          <h1 className="text-5xl font-extrabold">{productDetail.title}</h1>
-          <div className="flex gap-4">
-            <img width={250} src={productDetail.featuredImage.url} alt="" />
+        <div className="m-auto grid max-w-[80rem] grid-cols-1 gap-12 md:grid-cols-3">
+          <img
+            className={
+              "col-span-1 aspect-square h-full w-full object-cover md:col-span-2 "
+            }
+            width={250}
+            src={productDetail.featuredImage.url}
+            alt=""
+          />
+          <div className="col-span-1 flex flex-col gap-4">
+            <h1 className="text-5xl font-extrabold">{productDetail.title}</h1>
             <p className="max-w-xl">{productDetail.description}</p>
+            <button
+              className="cursor-pointer rounded bg-slate-950 p-3 text-white outline outline-2 outline-offset-2 outline-transparent disabled:cursor-not-allowed disabled:bg-slate-600"
+              disabled
+            >
+              Out of stock
+            </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

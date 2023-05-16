@@ -234,3 +234,134 @@ const handleSubmit = (e: any) => {
 ```
 
 Then we need to build the search result page. You are equipped with all the tool you need to build it yourself!
+
+# Nightclass 2
+
+# Exercices
+
+# Step 1
+
+We want to improve the user experience while browsing the application. So far we don't have any indication that the application is loading or that any type of error has happened.
+
+We already have components ready to display those states but they are not being displayed yet.
+
+We'll use the "search" functionality as an example for this session but once you're done with the search we'll be able to update any other page.
+
+## Displaying a loading state
+
+In `search.tsx` we have a variable that holds the data we want to display but nothing to keep track of the loading state.
+We can add a `useState` to keep track of whether we are loading the result (or not) and set it accordingly based on the state of the request.
+While the request is loading we could display a few `LoadingProducts.tsx` components to show that something is loading.
+
+You can refer to the `TODO:#1` in `search.tsx` if you are unsure what to do.
+
+
+## Displaying an error state
+
+In `search.tsx` we can do something very similar to what we just did to also manage any error that might arise.
+We can add another `useState` to choose whether we should display an error message to our users when the request to get the data fails.
+When there's an actual error we should display a `Error.tsx` component instead of trying to display a list of results.
+
+You can refer to the `TODO:#2` in `search.tsx` if you are unsure what to do.
+
+## Displaying an empty state 
+
+When there is no valid results to be displayed, the search page looks empty. We could also display a specific component to show the lack of results.
+Display `NoResults.tsx` when the result of the search is empty.
+
+You can refer to the `TODO:#3` in `search.tsx` if you are unsure what to do.
+
+# Step 2
+
+## Using `useQuery` from react-query
+
+We learned how to manage loading, error, and empty state for one component ; now we need to do that every time we want to get some data. That's cumbersome.
+
+To avoid setting all these `useState` everytime we can use some library to do it for us. We can replace our `useEffect` that fetches the data by a hook called `useQuery` provided by `react-query`. By doing so we won't have to manage error and loading state, `react-query` will do it for us, and more.
+In the end, you should have something that looks like this: 
+```typescript
+const { data, isLoading, isError } = useQuery(
+    [`search`, query],
+    async (): Promise<Product[]> => {
+      const response = await fetch(
+        `https://mock.shop/api?...${query}...`
+      );
+      const jsonResponse = (await response.json()) as ProductsResponse;
+      return jsonResponse.data.products.edges;
+    }
+);
+```
+
+You can refer to the `TODO:#4` in `search.tsx` and [react-query's docs](https://tanstack.com/query/v4/docs/react/guides/queries) if you need some guidance.
+
+## Creating reusable hooks
+
+Now that our data fetching is handled by `react-query`, we might want to avoid rewriting the same thing query function twice so we can extract it in its own file. We might not reuse it right now but it may come in handy when we want to test/mock our function.
+
+You can refer to the `TODO:#5` in `search.tsx` and [this sample](https://github.com/TanStack/query/blob/main/examples/react/basic-typescript/src/index.tsx#L28) .
+
+# Step 3
+
+Now that we know how to get data, we need to learn how to send data as well. 
+We can learn to do it using `react-query`'s `useMutation` hook. This is very similar to `useQuery` except this time we'll be sending some data alongside our request.
+
+## Using `useMutation`
+
+We have a simple use case for mutation: getting people to subscribe to our newsletter! Even though we don't have a newsletter running (yet) we can start collecting emails already.
+The footer of our app now have a new input field to collect email and a button to submit it!
+We also have a (fake) endpoint ready in our NextJS application: `/pages/api/newsletter.ts`. This endpoint does not do anything except returning the proper HTTP status but at least we can set everything like a real API call.
+
+The fetch call for our mutation should look like this:
+```typescript
+fetch('/api/newsletter', {
+  method: 'POST',
+  body: JSON.stringify({ email: 'some email' })
+})
+```
+
+Open the `Footer.tsx` file and follow the `TODO:#6` to get started. You can read more about using the fetch function to do POST call [here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and more about the `useMutation` hook in [`react-query`'s docs](https://tanstack.com/query/v4/docs/react/reference/useMutation)
+
+## Using tRPC
+
+Last time we set up a few things: hosting, deployment, and our database. Everything is still connected and we should be able to persist data. 
+
+The Database schema has been altered to add a new entity: `Subscriber`.
+The Subscriber table will only record all emails addresses that have successfully registered to our newsletter.
+
+To update your schema if you haven't done so yet: `npx prisma db push`
+
+Go to your [Planetscale dashboard](https://app.planetscale.com/), select your DB and go to `Console` and connect to it.
+
+A Terminal opens up and we can send command to browse our DB.
+
+```
+SHOW TABLES;
+-- you should see `Subscriber`
+SELECT * FROM Subscriber;
+-- you should initially have no data
+```
+
+Back to our app.
+
+A new `tRPC` endpoint has been defined in `/server/api/routers/newsletter.ts`. This time we really are persisting the data in our database!
+To use this endpoint in our frontend application, we need to use the `tRPC` client from `~/utils/api`. With the help of `createTRPCNext<AppRouter>` the object will contains all our routes definitions and will be typesafe. We can now define our schema for the backend and use all the type definition in the frontend for free!
+
+Replace the `useMutation` hook we wrote in the previous step by `api.newsletter.subscribe.useMutation()`.
+
+If you now try to submit the form, you should see a "Subscribed" message instead of the text field. Network tab should confirm that the request went through.
+We can double check in Planetscale dashboard.
+
+```
+SELECT * FROM Subscriber;
+-- you should see some data now
+-- you can clear your DB from test data using
+DELETE FROM Subscriber;
+```
+
+# Wrapping up
+
+We now have a robust way of fetching and managing the lifecycle of our data. 
+We're able to reuse function to fetch our data and leverage a built-in caching mecanism.
+We're able to collect information through a form and save that data in our database for long term storage.
+
+We're now ready to go a bit more in-depth regarding form and data collection but that will gonna have to wait for part 3 of our series!

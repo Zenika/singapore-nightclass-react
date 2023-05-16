@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { LoadingCollection } from "~/components/Collections/LoadingCollection";
 
 type CollectionEdge = {
   cursor: string;
@@ -38,19 +40,29 @@ export default function Collections() {
   });
 
   return (
-    <div className={"p-10"}>
-      <h1 className={"text-5xl"}>Collections</h1>
+    <div className={"bg-gray-100 p-4 md:p-10"}>
+      <h1 className={"my-8 text-5xl font-bold"}>Collections</h1>
 
-      <ul className={"flex flex-wrap gap-4"}>
+      <ul className={"grid grid-cols-3 flex-wrap gap-8"}>
         {collections.map((collection) => (
           <li key={collection.node.handle}>
             <Link
-              className={
-                "flex rounded border-[1px] border-solid border-pink-400 bg-pink-100 p-4 hover:bg-pink-200"
-              }
+              className={`group flex flex-col justify-start border-solid hover:underline`}
               href={`/collections/${collection.node.handle}`}
             >
-              {collection.node.title}
+              <div className={"overflow-hidden rounded"}>
+                <img
+                  src={collection.node.image.url}
+                  alt=""
+                  className={
+                    "aspect-square object-cover transition-transform duration-100 group-hover:scale-[1.1]"
+                  }
+                />
+              </div>
+              <p className={"flex items-center py-4 text-lg font-semibold"}>
+                {collection.node.title}{" "}
+                <ArrowRightIcon className={"ml-2 h-4 w-4"} />
+              </p>
             </Link>
           </li>
         ))}
