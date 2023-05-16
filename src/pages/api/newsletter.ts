@@ -2,6 +2,7 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
     const body: { email: string } = JSON.parse(req.body);
     if (!body.email) {
       res.status(400).send({ message: "missing email in body" });
