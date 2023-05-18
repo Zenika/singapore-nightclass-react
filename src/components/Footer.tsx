@@ -1,18 +1,18 @@
 import { api } from "~/utils/api";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 
 export function Footer() {
   const [email, setEmail] = useState<string>("");
   const [subscribed, setSubscribed] = useState<boolean>(false);
-
-  // TODO:#6 use `react-query`'s `useMutation` to make a POST call and get a `mutate` function to use
+  const { mutate } = api.newsletter.subscribe.useMutation({
+    onSuccess: () => setSubscribed(true),
+  });
 
   const handleSubmit = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     e.preventDefault();
     console.log("[Footer] trying to subscribe to newsletter using", email);
-    // TODO:#6 use your `mutate` function here
+    mutate({ email });
   };
   return (
     <footer
