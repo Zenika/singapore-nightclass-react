@@ -35,7 +35,7 @@ const Search = () => {
   const router = useRouter();
   const { q } = router.query;
   const [results, setResults] = useState<Product[] | null>(null);
-  // TODO:#1 we can keep track of the loading state here
+  const [loading, setLoading] = useState<boolean>(true);
   // TODO:#2 we should handle error with more than just logging to the console
   // TODO:#4 we can replace most of the code we wrote by using `useQuery` from `react-query`
   // The first argument is an array to tell react-query when to call the function again
@@ -46,7 +46,7 @@ const Search = () => {
 
   useEffect(() => {
     if (query) {
-      // TODO:#1 we start loading here
+      setLoading(true);
       // TODO:#2 we should reset the error if there's any
       fetch(
         `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
@@ -56,7 +56,7 @@ const Search = () => {
         })
         .then((jsonResponse: ProductsResponse) => {
           setResults(jsonResponse.data.products.edges);
-          // TODO:#1 we are done loading here
+          setLoading(false);
         })
         .catch((err) => {
           // TODO:#2 we should handle error with more than just logging to the console
@@ -72,10 +72,22 @@ const Search = () => {
       <p className={"mb-8"}>
         {results?.length || 0} result(s) for {q}
       </p>
-      {/* TODO:#1 display loading components `LoadingProducts.tsx` while no data has been received */}
+      {loading && (
+        <ul className="grid grid-cols-3 gap-8">
+          <li>
+            <LoadingProduct />
+          </li>
+          <li>
+            <LoadingProduct />
+          </li>
+          <li>
+            <LoadingProduct />
+          </li>
+        </ul>
+      )}
       {/* TODO:#2 display `Error.tsx` when there's a failure */}
       {/* TODO:#3 display `NoResults.tsx` when there's no results */}
-      {results && (
+      {!loading && results && (
         <ul className="grid grid-cols-3 gap-8">
           {results.map((result) => (
             <li key={result.node.handle}>
