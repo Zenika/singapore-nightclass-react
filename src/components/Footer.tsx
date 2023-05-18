@@ -1,22 +1,12 @@
 import { api } from "~/utils/api";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 
 export function Footer() {
   const [email, setEmail] = useState<string>("");
   const [subscribed, setSubscribed] = useState<boolean>(false);
-
-  const { mutate } = useMutation(
-    ["subscribe"],
-    (input: { email: string }) =>
-      fetch("/api/newsletter", {
-        method: "POST",
-        body: JSON.stringify({ email: input.email }),
-      }),
-    {
-      onSuccess: () => setSubscribed(true),
-    }
-  );
+  const { mutate } = api.newsletter.subscribe.useMutation({
+    onSuccess: () => setSubscribed(true),
+  });
 
   const handleSubmit = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
