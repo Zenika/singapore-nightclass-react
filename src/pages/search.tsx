@@ -34,9 +34,9 @@ type ProductsResponse = {
 const Search = () => {
   const router = useRouter();
   const { q } = router.query;
-  const [results, setResults] = useState<Product[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
+  const [data, setData] = useState<Product[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
   // TODO:#4 we can replace most of the code we wrote by using `useQuery` from `react-query`
   // The first argument is an array to tell react-query when to call the function again
   // similar to an array of dependencies for useEffect
@@ -46,8 +46,8 @@ const Search = () => {
 
   useEffect(() => {
     if (query) {
-      setLoading(true);
-      setError(false);
+      setIsLoading(true);
+      setIsError(false);
       fetch(
         `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
       )
@@ -55,14 +55,14 @@ const Search = () => {
           return response.json();
         })
         .then((jsonResponse: ProductsResponse) => {
-          setResults(jsonResponse.data.products.edges);
+          setData(jsonResponse.data.products.edges);
         })
         .catch((err) => {
           console.error(err);
-          setError(true);
+          setIsError(true);
         })
         .finally(() => {
-          setLoading(false);
+          setIsLoading(false);
         });
     }
   }, [query]);
@@ -71,9 +71,9 @@ const Search = () => {
     <div className="p-4 md:p-10">
       <h1 className="mb-4 text-5xl font-extrabold">Search results</h1>
       <p className={"mb-8"}>
-        {results?.length || 0} result(s) for {q}
+        {data?.length || 0} result(s) for {q}
       </p>
-      {loading && (
+      {isLoading && (
         <ul className="grid grid-cols-3 gap-8">
           <li>
             <LoadingProduct />
@@ -86,11 +86,11 @@ const Search = () => {
           </li>
         </ul>
       )}
-      {!loading && error && <Error />}
-      {/* TODO:#3 display `NoResults.tsx` when there's no results */}
-      {!loading && !error && results && (
+      {!isLoading && isError && <Error />}
+      {!isLoading && !isError && data && data.length === 0 && <NoResults />}
+      {!isLoading && !isError && data && data.length > 0 && (
         <ul className="grid grid-cols-3 gap-8">
-          {results.map((result) => (
+          {data.map((result) => (
             <li key={result.node.handle}>
               <Link
                 className={"group flex flex-col justify-start border-solid"}
