@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LoadingProduct } from "~/components/Product/LoadingProduct";
 import { NoResults } from "~/components/Search/NoResults";
 import { Error } from "~/components/Search/Error";
+import { useQuery } from "@tanstack/react-query";
 
 type Product = {
   node: {
@@ -34,38 +35,18 @@ type ProductsResponse = {
 const Search = () => {
   const router = useRouter();
   const { q } = router.query;
-  const [data, setData] = useState<Product[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  // TODO:#4 we can replace most of the code we wrote by using `useQuery` from `react-query`
-  // The first argument is an array to tell react-query when to call the function again
-  // similar to an array of dependencies for useEffect
-  // The second argument is the function that will be called to get the data
   // TODO:#5 we can now extract our query in its own function/file then we can reuse it somewhere else (and test it) more easily!
   const query: string = q && typeof q === "string" ? q : "";
 
-  useEffect(() => {
-    if (query) {
-      setIsLoading(true);
-      setIsError(false);
-      fetch(
-        `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
+  const { data, isLoading, isError } = useQuery(["search", query], () =>
+    fetch(
+      `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
+    )
+      .then((response) => response.json())
+      .then(
+        (jsonResponse: ProductsResponse) => jsonResponse.data.products.edges
       )
-        .then((response) => {
-          return response.json();
-        })
-        .then((jsonResponse: ProductsResponse) => {
-          setData(jsonResponse.data.products.edges);
-        })
-        .catch((err) => {
-          console.error(err);
-          setIsError(true);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [query]);
+  );
 
   return (
     <div className="p-4 md:p-10">
