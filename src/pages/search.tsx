@@ -1,36 +1,9 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LoadingProduct } from "~/components/Product/LoadingProduct";
 import { NoResults } from "~/components/Search/NoResults";
 import { Error } from "~/components/Search/Error";
-import { useQuery } from "@tanstack/react-query";
-
-type Product = {
-  node: {
-    id: string;
-    title: string;
-    handle: string;
-    images: {
-      edges: {
-        node: {
-          url: string;
-        };
-      }[];
-    };
-    variants: {
-      edges: { node: { price: { amount: number; currencyCode: string } } }[];
-    };
-  };
-};
-
-type ProductsResponse = {
-  data: {
-    products: {
-      edges: Product[];
-    };
-  };
-};
+import { useSearchResults } from "~/hooks/useSearchResults";
 
 const Search = () => {
   const router = useRouter();
@@ -38,15 +11,7 @@ const Search = () => {
   // TODO:#5 we can now extract our query in its own function/file then we can reuse it somewhere else (and test it) more easily!
   const query: string = q && typeof q === "string" ? q : "";
 
-  const { data, isLoading, isError } = useQuery(["search", query], () =>
-    fetch(
-      `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
-    )
-      .then((response) => response.json())
-      .then(
-        (jsonResponse: ProductsResponse) => jsonResponse.data.products.edges
-      )
-  );
+  const { data, isLoading, isError } = useSearchResults(query);
 
   return (
     <div className="p-4 md:p-10">
