@@ -36,7 +36,7 @@ const Search = () => {
   const { q } = router.query;
   const [results, setResults] = useState<Product[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  // TODO:#2 we should handle error with more than just logging to the console
+  const [error, setError] = useState<boolean>(false);
   // TODO:#4 we can replace most of the code we wrote by using `useQuery` from `react-query`
   // The first argument is an array to tell react-query when to call the function again
   // similar to an array of dependencies for useEffect
@@ -47,7 +47,7 @@ const Search = () => {
   useEffect(() => {
     if (query) {
       setLoading(true);
-      // TODO:#2 we should reset the error if there's any
+      setError(false);
       fetch(
         `https://mock.shop/api?query={products(first: 10, query: "title:${query}"){edges {node {id title handle images(first: 1) { edges { node { url } } } variants(first: 1) { edges { node { price { amount currencyCode } } } } } } } }`
       )
@@ -56,12 +56,13 @@ const Search = () => {
         })
         .then((jsonResponse: ProductsResponse) => {
           setResults(jsonResponse.data.products.edges);
-          setLoading(false);
         })
         .catch((err) => {
-          // TODO:#2 we should handle error with more than just logging to the console
-          // update the state to reflect the error in the UI
           console.error(err);
+          setError(true);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   }, [query]);
@@ -85,9 +86,9 @@ const Search = () => {
           </li>
         </ul>
       )}
-      {/* TODO:#2 display `Error.tsx` when there's a failure */}
+      {!loading && error && <Error />}
       {/* TODO:#3 display `NoResults.tsx` when there's no results */}
-      {!loading && results && (
+      {!loading && !error && results && (
         <ul className="grid grid-cols-3 gap-8">
           {results.map((result) => (
             <li key={result.node.handle}>
