@@ -1,9 +1,19 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import {
+  MagnifyingGlassIcon,
+  ShoppingCartIcon,
+} from "@heroicons/react/24/solid";
+import { useCart } from "~/context/cartContext";
 
 export function Header() {
   const router = useRouter();
+  const { state } = useCart();
+
+  const itemsInCart = Object.values(state.items).reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   const handleSearch = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -39,6 +49,14 @@ export function Header() {
               <MagnifyingGlassIcon className={"h-6 w-6"} />
             </button>
           </form>
+          <button aria-label={"cart"} className={"relative px-4"}>
+            <ShoppingCartIcon className={"h-6 w-6"} />
+            {itemsInCart !== 0 && (
+              <div className="text-bold absolute bottom-0 right-0 h-4 w-4 rounded-full bg-red-400 text-xs text-white">
+                {itemsInCart}
+              </div>
+            )}
+          </button>
         </div>
       </nav>
     </header>
