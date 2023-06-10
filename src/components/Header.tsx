@@ -49,14 +49,18 @@ export function Header() {
               <MagnifyingGlassIcon className={"h-6 w-6"} />
             </button>
           </form>
-          <button aria-label={"cart"} className={"relative px-4"}>
+          <Link
+            href={"/cart"}
+            aria-label={"go to cart"}
+            className={"relative me-2 p-2 text-center"}
+          >
             <ShoppingCartIcon className={"h-6 w-6"} />
             {itemsInCart !== 0 && (
               <div className="text-bold absolute bottom-0 right-0 h-4 w-4 rounded-full bg-red-400 text-xs text-white">
                 {itemsInCart}
               </div>
             )}
-          </button>
+          </Link>
         </div>
       </nav>
     </header>
