@@ -58,20 +58,24 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       };
     }
     case CartActionType.Remove: {
-      return {
+      const newQuantity = Math.max(
+        (state.items[action.item.handle]?.quantity || 0) - action.item.quantity,
+        0
+      );
+      const newState = {
         ...state,
         items: {
           ...state.items,
           [action.item.handle]: {
             ...action.item,
-            quantity: Math.max(
-              (state.items[action.item.handle]?.quantity || 0) -
-                action.item.quantity,
-              0
-            ),
+            quantity: newQuantity,
           },
         },
       };
+      if (newQuantity === 0) {
+        delete newState.items[action.item.handle];
+      }
+      return newState;
     }
     case CartActionType.Set: {
       return {
