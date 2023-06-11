@@ -4,7 +4,7 @@ import crypto from "crypto";
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
-    const body: { email: string } = JSON.parse(req.body);
+    const body: unknown = JSON.parse(req.body);
     if (!body) {
       res.status(400).send({ message: "missing body" });
     } else {
