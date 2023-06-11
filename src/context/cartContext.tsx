@@ -27,8 +27,17 @@ export enum CartActionType {
   Add = "add",
   Remove = "remove",
   Set = "set",
+  Reset = "reset",
 }
-type CartAction = { type: CartActionType; item: Item };
+
+type CartAction<T = CartActionType> = T extends CartActionType.Reset
+  ? {
+      type: CartActionType.Reset;
+    }
+  : {
+      type: Exclude<CartActionType, CartActionType.Reset>;
+      item: Item;
+    };
 
 const initialCartState: CartState = {
   items: {},
@@ -88,9 +97,15 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         },
       };
     }
+    case CartActionType.Reset: {
+      return {
+        ...state,
+        items: {},
+      };
+    }
     default: {
       // will throw at compile time if any action is missing
-      const exhaustiveCheck: never = action.type;
+      const exhaustiveCheck: never = (action as { type: never }).type;
       throw new Error(`Unhandled action type:`, exhaustiveCheck);
     }
   }

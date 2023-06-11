@@ -1,6 +1,35 @@
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import { CartActionType, useCart } from "~/context/cartContext";
+
+const kebabToCamel = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/(-[a-z])/g, (group: string) =>
+      group.toUpperCase().replace("-", "")
+    );
 
 export default function Checkout() {
+  const router = useRouter();
+  const { dispatch } = useCart();
+  const { mutate } = useMutation(
+    ["checkout"],
+    (order: unknown) =>
+      fetch("/api/checkout", {
+        method: "POST",
+        body: JSON.stringify(order),
+      }),
+    {
+      onSuccess: () => {
+        console.log("done");
+        dispatch({ type: CartActionType.Reset });
+        router
+          .push("/cart/confirmation")
+          .catch((e) => console.log("failed to go to ", e));
+      },
+    }
+  );
   const handleSubmit = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     e.preventDefault();
@@ -10,6 +39,17 @@ export default function Checkout() {
       .forEach((formItem, idx) => {
         console.log(`${idx}.[${formItem.name}] => (${formItem.value})`);
       });
+    const formValues = Array.from<{ name: string; value: string }>(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      e.target.elements
+    )
+      .filter((formItem) => formItem.name !== "")
+      .reduce((acc, elt) => {
+        return { ...acc, [kebabToCamel(elt.name)]: elt.value };
+      }, {});
+    console.log(formValues);
+    // console.log("uuid", crypto.randomUUID());
+    mutate(formValues);
   };
   return (
     <div className="p-4 md:p-10">
