@@ -131,6 +131,7 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
                   id="email"
                   name="email"
                   type="email"
@@ -243,6 +244,11 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
+                  minLength={13}
+                  maxLength={16}
+                  pattern="^(4\d{12}|4\d{15}|5\d{15})$"
+                  title="Supported cards: Visa, Mastercard"
                   type="text"
                   name="cardnumber"
                   id="cardnumber"
@@ -261,6 +267,9 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
+                  pattern="^\d{2}/\d{2}$"
+                  title="Format: MM/YY"
                   type="text"
                   name="exp-date"
                   id="exp-date"
@@ -279,6 +288,9 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
+                  pattern="^\d{3}$"
+                  title="The 3 digits on the back of your card"
                   type="text"
                   name="cvc"
                   id="cvc"
