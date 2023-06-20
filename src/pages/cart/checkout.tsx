@@ -3,8 +3,10 @@ import { useRouter } from "next/router";
 import { CartActionType, useCart } from "~/context/cartContext";
 import { useCheckout } from "~/hooks/useCheckout";
 import { kebabCaseToCamelCase } from "~/utils/stringUtils";
-import { orderSchema } from "~/models/order";
+import { type OrderSchema, orderSchema } from "~/models/order";
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 export default function Checkout() {
   const router = useRouter();
@@ -17,6 +19,14 @@ export default function Checkout() {
         .push("/cart/confirmation")
         .catch((e) => console.log("failed to go to ", e));
     },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OrderSchema>({
+    resolver: zodResolver(orderSchema),
   });
 
   // TODO: #1 use HTML native validation to mark the `first-name` as required
@@ -115,7 +125,7 @@ export default function Checkout() {
     <div className="p-4 md:p-10">
       <h1 className="mb-4 text-5xl font-extrabold">Checkout</h1>
 
-      <form onSubmit={onSubmit} noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base font-semibold leading-7 text-gray-900">
             Personal Information
@@ -136,16 +146,15 @@ export default function Checkout() {
                 <input
                   required
                   type="text"
-                  name="first-name"
+                  {...register("firstName")}
                   id="first-name"
                   autoComplete="given-name"
-                  onChange={() => setErrorFirstName("")}
                   className={`${
-                    errorFirstName ? "ring-red-400" : "ring-gray-300"
+                    errors.firstName?.message ? "ring-red-400" : "ring-gray-300"
                   } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
-                {errorFirstName && (
-                  <p className="text-red-400">{errorFirstName}</p>
+                {errors.firstName?.message && (
+                  <p className="text-red-400">{errors.firstName?.message}</p>
                 )}
               </div>
             </div>
@@ -160,7 +169,7 @@ export default function Checkout() {
               <div className="mt-2">
                 <input
                   type="text"
-                  name="last-name"
+                  {...register("lastName")}
                   id="last-name"
                   autoComplete="family-name"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -179,15 +188,16 @@ export default function Checkout() {
                 <input
                   required
                   id="email"
-                  name="email"
+                  {...register("email")}
                   type="email"
                   autoComplete="email"
-                  onChange={() => setErrorEmail("")}
                   className={`${
-                    errorEmail ? "ring-red-400" : "ring-gray-300"
+                    errors.email?.message ? "ring-red-400" : "ring-gray-300"
                   } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
-                {errorEmail && <p className="text-red-400">{errorEmail}</p>}
+                {errors.email?.message && (
+                  <p className="text-red-400">{errors.email?.message}</p>
+                )}
               </div>
             </div>
 
@@ -206,15 +216,18 @@ export default function Checkout() {
                   pattern="^(4\d{12}|4\d{15}|5\d{15})$"
                   title="Supported cards: Visa, Mastercard"
                   type="text"
-                  name="cardnumber"
+                  {...register("cardnumber")}
                   id="cardnumber"
                   autoComplete="cc-number"
-                  onChange={() => setErrorCard("")}
                   className={`${
-                    errorCard ? "ring-red-400" : "ring-gray-300"
+                    errors.cardnumber?.message
+                      ? "ring-red-400"
+                      : "ring-gray-300"
                   } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
-                {errorCard && <p className="text-red-400">{errorCard}</p>}
+                {errors.cardnumber?.message && (
+                  <p className="text-red-400">{errors.cardnumber?.message}</p>
+                )}
               </div>
             </div>
           </div>
