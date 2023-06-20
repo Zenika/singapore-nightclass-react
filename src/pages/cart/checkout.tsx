@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { CartActionType, useCart } from "~/context/cartContext";
 import { useCheckout } from "~/hooks/useCheckout";
 import { kebabCaseToCamelCase } from "~/utils/stringUtils";
-import { type FormValues } from "~/models/order";
+import { orderSchema } from "~/models/order";
 import { useState } from "react";
 
 export default function Checkout() {
@@ -72,26 +72,35 @@ export default function Checkout() {
       .filter((formItem) => formItem.name !== "")
       .reduce((acc, elt) => {
         return { ...acc, [kebabCaseToCamelCase(elt.name)]: elt.value };
-      }, {}) as FormValues; // FIXME: this type is a lie!
+      }, {});
+
+    const parsedFormValues = orderSchema.safeParse(formValues);
+
+    if (!parsedFormValues.success) {
+      console.log("Interrupted by zod validation");
+      return;
+    }
 
     let hasError = false;
 
-    if (!formValues.firstName) {
+    if (!parsedFormValues.data.firstName) {
       setErrorFirstName("Required");
       hasError = true;
     }
 
-    if (!formValues.email) {
+    if (!parsedFormValues.data.email) {
       setErrorEmail("Required");
       hasError = true;
     } else {
       // FIXME: we should check for valid email as well
     }
 
-    if (!formValues.cardnumber) {
+    if (!parsedFormValues.data.cardnumber) {
       setErrorCard("Required");
       hasError = true;
-    } else if (!/^(4\d{12}|4\d{15}|5\d{15})$/.test(formValues.cardnumber)) {
+    } else if (
+      !/^(4\d{12}|4\d{15}|5\d{15})$/.test(parsedFormValues.data.cardnumber)
+    ) {
       setErrorCard("Invalid format");
       hasError = true;
     }
