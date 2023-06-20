@@ -53,6 +53,8 @@ export default function Checkout() {
   // TODO: #6bis (optional) use the same rules on the server side in the `/api/checkout.ts` file
 
   const [errorFirstName, setErrorFirstName] = useState("");
+  const [errorEmail, setErrorEmail] = useState("");
+  const [errorCard, setErrorCard] = useState("");
 
   const onSubmit = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -72,8 +74,29 @@ export default function Checkout() {
         return { ...acc, [kebabCaseToCamelCase(elt.name)]: elt.value };
       }, {}) as FormValues; // FIXME: this type is a lie!
 
+    let hasError = false;
+
     if (!formValues.firstName) {
       setErrorFirstName("Required");
+      hasError = true;
+    }
+
+    if (!formValues.email) {
+      setErrorEmail("Required");
+      hasError = true;
+    } else {
+      // FIXME: we should check for valid email as well
+    }
+
+    if (!formValues.cardnumber) {
+      setErrorCard("Required");
+      hasError = true;
+    } else if (!/^(4\d{12}|4\d{15}|5\d{15})$/.test(formValues.cardnumber)) {
+      setErrorCard("Invalid format");
+      hasError = true;
+    }
+
+    if (hasError) {
       return;
     }
 
@@ -150,8 +173,12 @@ export default function Checkout() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  onChange={() => setErrorEmail("")}
+                  className={`${
+                    errorEmail ? "ring-red-400" : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
+                {errorEmail && <p className="text-red-400">{errorEmail}</p>}
               </div>
             </div>
 
@@ -173,8 +200,12 @@ export default function Checkout() {
                   name="cardnumber"
                   id="cardnumber"
                   autoComplete="cc-number"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  onChange={() => setErrorCard("")}
+                  className={`${
+                    errorCard ? "ring-red-400" : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
+                {errorCard && <p className="text-red-400">{errorCard}</p>}
               </div>
             </div>
           </div>
