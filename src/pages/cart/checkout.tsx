@@ -94,6 +94,7 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
                   type="text"
                   name="first-name"
                   id="first-name"
