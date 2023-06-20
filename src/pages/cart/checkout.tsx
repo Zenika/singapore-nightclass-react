@@ -2,7 +2,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { CartActionType, useCart } from "~/context/cartContext";
 import { useCheckout } from "~/hooks/useCheckout";
-import { kebabCaseToCamelCase } from "~/utils/stringUtils";
+import { type OrderSchema, orderSchema } from "~/models/order";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 export default function Checkout() {
   const router = useRouter();
@@ -15,6 +17,14 @@ export default function Checkout() {
         .push("/cart/confirmation")
         .catch((e) => console.log("failed to go to ", e));
     },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OrderSchema>({
+    resolver: zodResolver(orderSchema),
   });
 
   // TODO: #1 use HTML native validation to mark the `first-name` as required
@@ -50,32 +60,11 @@ export default function Checkout() {
   //react-hook-form.com/get-started#Integratinganexistingform
   // TODO: #6bis (optional) use the same rules on the server side in the `/api/checkout.ts` file
 
-  const onSubmit = (e: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    e.preventDefault();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-    Array.from<{ name: string; value: string }>(e.target.elements)
-      .filter((formItem) => formItem.name !== "")
-      .forEach((formItem, idx) => {
-        console.log(`${idx}.[${formItem.name}] => (${formItem.value})`);
-      });
-    const formValues = Array.from<{ name: string; value: string }>(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      e.target.elements
-    )
-      .filter((formItem) => formItem.name !== "")
-      .reduce((acc, elt) => {
-        return { ...acc, [kebabCaseToCamelCase(elt.name)]: elt.value };
-      }, {});
-    console.log(formValues);
-
-    mutate(formValues);
-  };
   return (
     <div className="p-4 md:p-10">
       <h1 className="mb-4 text-5xl font-extrabold">Checkout</h1>
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit((data) => mutate(data))} noValidate>
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base font-semibold leading-7 text-gray-900">
             Personal Information
@@ -94,12 +83,18 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
                   type="text"
-                  name="first-name"
+                  {...register("firstName")}
                   id="first-name"
                   autoComplete="given-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className={`${
+                    errors.firstName?.message ? "ring-red-400" : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
+                {errors.firstName?.message && (
+                  <p className="text-red-400">{errors.firstName?.message}</p>
+                )}
               </div>
             </div>
 
@@ -113,7 +108,7 @@ export default function Checkout() {
               <div className="mt-2">
                 <input
                   type="text"
-                  name="last-name"
+                  {...register("lastName")}
                   id="last-name"
                   autoComplete="family-name"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -130,106 +125,18 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
                   id="email"
-                  name="email"
+                  {...register("email")}
                   type="email"
                   autoComplete="email"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className={`${
+                    errors.email?.message ? "ring-red-400" : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="country"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Country
-              </label>
-              <div className="mt-2">
-                <select
-                  id="country"
-                  name="country"
-                  autoComplete="country-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                >
-                  <option>Singapore</option>
-                  <option>Indonesia</option>
-                  <option>Malaysia</option>
-                  <option>France</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="street-address"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Street address
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="street-address"
-                  id="street-address"
-                  autoComplete="street-address"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 sm:col-start-1">
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                City
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="city"
-                  id="city"
-                  autoComplete="address-level2"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="region"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                State / Province
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="region"
-                  id="region"
-                  autoComplete="address-level1"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="postal-code"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                ZIP / Postal code
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="postal-code"
-                  id="postal-code"
-                  autoComplete="postal-code"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
+                {errors.email?.message && (
+                  <p className="text-red-400">{errors.email?.message}</p>
+                )}
               </div>
             </div>
 
@@ -242,48 +149,24 @@ export default function Checkout() {
               </label>
               <div className="mt-2">
                 <input
+                  required
+                  minLength={13}
+                  maxLength={16}
+                  pattern="^(4\d{12}|4\d{15}|5\d{15})$"
+                  title="Supported cards: Visa, Mastercard"
                   type="text"
-                  name="cardnumber"
+                  {...register("cardnumber")}
                   id="cardnumber"
                   autoComplete="cc-number"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className={`${
+                    errors.cardnumber?.message
+                      ? "ring-red-400"
+                      : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="exp-date"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Expiry date
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="exp-date"
-                  id="exp-date"
-                  autoComplete="cc-exp"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="cvc"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                CCV
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  name="cvc"
-                  id="cvc"
-                  autoComplete="cc-csc"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
+                {errors.cardnumber?.message && (
+                  <p className="text-red-400">{errors.cardnumber?.message}</p>
+                )}
               </div>
             </div>
           </div>
