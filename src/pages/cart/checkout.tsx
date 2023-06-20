@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import { CartActionType, useCart } from "~/context/cartContext";
 import { useCheckout } from "~/hooks/useCheckout";
 import { kebabCaseToCamelCase } from "~/utils/stringUtils";
+import { type FormValues } from "~/models/order";
+import { useState } from "react";
 
 export default function Checkout() {
   const router = useRouter();
@@ -50,6 +52,8 @@ export default function Checkout() {
   //react-hook-form.com/get-started#Integratinganexistingform
   // TODO: #6bis (optional) use the same rules on the server side in the `/api/checkout.ts` file
 
+  const [errorFirstName, setErrorFirstName] = useState("");
+
   const onSubmit = (e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     e.preventDefault();
@@ -66,8 +70,12 @@ export default function Checkout() {
       .filter((formItem) => formItem.name !== "")
       .reduce((acc, elt) => {
         return { ...acc, [kebabCaseToCamelCase(elt.name)]: elt.value };
-      }, {});
-    console.log(formValues);
+      }, {}) as FormValues; // FIXME: this type is a lie!
+
+    if (!formValues.firstName) {
+      setErrorFirstName("Required");
+      return;
+    }
 
     mutate(formValues);
   };
@@ -99,8 +107,14 @@ export default function Checkout() {
                   name="first-name"
                   id="first-name"
                   autoComplete="given-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  onChange={() => setErrorFirstName("")}
+                  className={`${
+                    errorFirstName ? "ring-red-400" : "ring-gray-300"
+                  } block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6`}
                 />
+                {errorFirstName && (
+                  <p className="text-red-400">{errorFirstName}</p>
+                )}
               </div>
             </div>
 
