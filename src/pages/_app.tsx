@@ -7,6 +7,7 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
+import { CartProvider } from "~/context/cartContext";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -14,11 +15,13 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Header />
-      <main className="flex grow flex-col">
-        <Component {...pageProps} />
-      </main>
-      <Footer />
+      <CartProvider>
+        <Header />
+        <main className="flex grow flex-col">
+          <Component {...pageProps} />
+        </main>
+        <Footer />
+      </CartProvider>
     </SessionProvider>
   );
 };
