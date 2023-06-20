@@ -2,9 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { CartActionType, useCart } from "~/context/cartContext";
 import { useCheckout } from "~/hooks/useCheckout";
-import { kebabCaseToCamelCase } from "~/utils/stringUtils";
 import { type OrderSchema, orderSchema } from "~/models/order";
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -62,70 +60,11 @@ export default function Checkout() {
   //react-hook-form.com/get-started#Integratinganexistingform
   // TODO: #6bis (optional) use the same rules on the server side in the `/api/checkout.ts` file
 
-  const [errorFirstName, setErrorFirstName] = useState("");
-  const [errorEmail, setErrorEmail] = useState("");
-  const [errorCard, setErrorCard] = useState("");
-
-  const onSubmit = (e: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    e.preventDefault();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-    Array.from<{ name: string; value: string }>(e.target.elements)
-      .filter((formItem) => formItem.name !== "")
-      .forEach((formItem, idx) => {
-        console.log(`${idx}.[${formItem.name}] => (${formItem.value})`);
-      });
-    const formValues = Array.from<{ name: string; value: string }>(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      e.target.elements
-    )
-      .filter((formItem) => formItem.name !== "")
-      .reduce((acc, elt) => {
-        return { ...acc, [kebabCaseToCamelCase(elt.name)]: elt.value };
-      }, {});
-
-    const parsedFormValues = orderSchema.safeParse(formValues);
-
-    if (!parsedFormValues.success) {
-      console.log("Interrupted by zod validation");
-      return;
-    }
-
-    let hasError = false;
-
-    if (!parsedFormValues.data.firstName) {
-      setErrorFirstName("Required");
-      hasError = true;
-    }
-
-    if (!parsedFormValues.data.email) {
-      setErrorEmail("Required");
-      hasError = true;
-    } else {
-      // FIXME: we should check for valid email as well
-    }
-
-    if (!parsedFormValues.data.cardnumber) {
-      setErrorCard("Required");
-      hasError = true;
-    } else if (
-      !/^(4\d{12}|4\d{15}|5\d{15})$/.test(parsedFormValues.data.cardnumber)
-    ) {
-      setErrorCard("Invalid format");
-      hasError = true;
-    }
-
-    if (hasError) {
-      return;
-    }
-
-    mutate(formValues);
-  };
   return (
     <div className="p-4 md:p-10">
       <h1 className="mb-4 text-5xl font-extrabold">Checkout</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={handleSubmit((data) => mutate(data))} noValidate>
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base font-semibold leading-7 text-gray-900">
             Personal Information
