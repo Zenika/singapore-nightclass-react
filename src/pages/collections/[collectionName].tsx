@@ -41,6 +41,7 @@ type Response = {
 
 export default function Collection() {
   const router = useRouter();
+  console.log(router);
   const { collectionName } = router.query;
   const [products, setProducts] = useState<ProductEdge[]>([]);
 
@@ -56,6 +57,8 @@ export default function Collection() {
         .catch(console.error);
     }
   }, [collectionName]);
+
+  console.log(products);
 
   return (
     <div className={"bg-gray-100 p-4 md:p-10"}>

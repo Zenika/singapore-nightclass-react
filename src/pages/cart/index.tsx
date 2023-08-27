@@ -1,8 +1,8 @@
-import { useCart } from "~/context/cartContext";
+import { CartActionType, useCart } from "~/context/cartContext";
 import Link from "next/link";
 
 export default function Cart() {
-  const { state } = useCart();
+  const { state, dispatch } = useCart();
   const items = Object.values(state.items);
   return (
     <div className={"flex-1 bg-gray-100 p-4 md:p-10"}>
@@ -114,6 +114,16 @@ export default function Cart() {
           </table>
 
           <div className="flex justify-end">
+            <button
+              onClick={() =>
+                dispatch({
+                  type: CartActionType.Reset,
+                })
+              }
+              className="mt-4 cursor-pointer rounded bg-slate-950 p-3 px-10 text-white outline outline-2 outline-offset-2 outline-transparent disabled:cursor-not-allowed disabled:bg-slate-600"
+            >
+              Clear cart
+            </button>
             <Link
               href={"/cart/checkout"}
               className="mt-4 cursor-pointer rounded bg-slate-950 p-3 px-10 text-white outline outline-2 outline-offset-2 outline-transparent disabled:cursor-not-allowed disabled:bg-slate-600"
